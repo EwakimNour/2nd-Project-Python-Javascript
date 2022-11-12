@@ -1,0 +1,130 @@
+<html>
+
+<head>
+    <style>
+
+    </style>
+</head>
+
+<body onload="getorderthiscustomerData()">
+    <h1>All Your Receptions</h1>
+    <div id="order"></div>
+    <script>
+        let orderEl = document.getElementById('order')
+        let d = new Date()
+        let date = `${d.getDay()}.${d.getMonth()}.${d.getFullYear()}`
+        const fetchdata = async (linkdata) => {
+            const resp = await fetch(linkdata)
+            if (resp.ok) {
+                let data = await resp.json()
+                return data
+            }
+        }
+        async function getorderthiscustomerData() {
+            let customervalue = sessionStorage.getItem('customerId')
+            let productvalue = sessionStorage.getItem('productId')
+            let products = `http://127.0.0.1:5000/purchases/searchbycustomerid/${customervalue}`
+            products = await fetchdata(products)
+            products.forEach(product => {
+                let card_Product_El = document.createElement('div')
+                let card_p_El = document.createElement('div')
+                let People_who_bought_El = document.createElement('h2')
+                let amount_People_who_bought_El = document.createElement('SPAN')
+                let ulEl = document.createElement('ul')
+                let Name_of_product_li_El = document.createElement('li')
+                let Space_Name_of_product_Text_El = document.createElement('SPAN')
+                let Name_of_product_Text_El = document.createElement('LABEL')
+                let Name_of_product_El = document.createElement('SPAN')
+                let Price_of_product_li_El = document.createElement('li')
+                let Space_Price_of_product_Text_El = document.createElement('SPAN')
+                let Price_of_product_Text_El = document.createElement('LABEL')
+                let Price_of_product_El = document.createElement('SPAN')
+                let Quantity_of_product_li_El = document.createElement('li')
+                let Space_Quantity_of_product_Text_El = document.createElement('SPAN')
+                let Quantity_of_product_Text_El = document.createElement('LABEL')
+                let Quantity_of_product_El = document.createElement('SPAN')
+                let Add_Purchase_tr_El = document.createElement('li')
+                let text_Add_Purchase_El = document.createElement('td')
+                let Date_of_Add_Purchase_El = document.createElement('td')
+                let Button_For_Add_Purchase_El = document.createElement('button')
+                let return_tr_El = document.createElement('tr')
+                let customers_page_El = document.createElement('button')
+                let product_page_El = document.createElement('button')
+                // Date_of_Add_Purchase_El.type = "text"
+                orderEl.appendChild(card_Product_El)
+                card_Product_El.appendChild(card_p_El)
+                card_p_El.appendChild(People_who_bought_El)
+                People_who_bought_El.appendChild(amount_People_who_bought_El)
+                card_p_El.appendChild(ulEl)
+                ulEl.appendChild(Name_of_product_li_El)
+                Name_of_product_li_El.appendChild(Space_Name_of_product_Text_El)
+                Name_of_product_li_El.appendChild(Name_of_product_Text_El)
+                Name_of_product_li_El.appendChild(Name_of_product_El)
+                ulEl.appendChild(Price_of_product_li_El)
+                Price_of_product_li_El.appendChild(Space_Price_of_product_Text_El)
+                Price_of_product_li_El.appendChild(Price_of_product_Text_El)
+                Price_of_product_li_El.appendChild(Price_of_product_El)
+                ulEl.appendChild(Quantity_of_product_li_El)
+                Quantity_of_product_li_El.appendChild(Space_Quantity_of_product_Text_El)
+                Quantity_of_product_li_El.appendChild(Quantity_of_product_Text_El)
+                Quantity_of_product_li_El.appendChild(Quantity_of_product_El)
+                ulEl.appendChild(Add_Purchase_tr_El)
+                Add_Purchase_tr_El.appendChild(text_Add_Purchase_El)
+                Add_Purchase_tr_El.appendChild(Date_of_Add_Purchase_El)
+                ulEl.appendChild(return_tr_El)
+                return_tr_El.appendChild(Button_For_Add_Purchase_El)
+                return_tr_El.appendChild(customers_page_El)
+                return_tr_El.appendChild(product_page_El)
+                amount_People_who_bought_El.innerText = "5"
+                People_who_bought_El.innerText = `Reception for ${product.Name}`
+                Name_of_product_Text_El.innerText = "Name Of Product  "
+                Name_of_product_El.innerText = product.Name
+                Price_of_product_Text_El.innerText = "Price  "
+                Price_of_product_El.innerText = product.Price
+                Quantity_of_product_Text_El.innerText = "Quantity  "
+                Quantity_of_product_El.innerText = product.Quantity
+                text_Add_Purchase_El.innerText = "Date  "
+                Date_of_Add_Purchase_El.innerText = date
+                Button_For_Add_Purchase_El.innerText = "Buy again"
+                customers_page_El.innerText = "go back"
+                product_page_El.innerText = "our product"
+                Button_For_Add_Purchase_El.onclick = async () => {
+                    let customervalue = sessionStorage.getItem('customerId')
+                    obj = {
+                        "CustomerID": customervalue,
+                        "ProductID": product.Id,
+                        "Date": date
+                    }
+                    let fetchParams = {
+                        method: "POST",
+                        body: JSON.stringify(obj),
+                        headers: { "Content-type": "application/json" }
+                    }
+                    console.log(obj)
+                    // sending request
+                    const resp = await fetch(`http://127.0.0.1:5000/purchases`, fetchParams)
+                    let status = await resp.json();
+                    console.log(status);
+                    alert(status)
+                    let productsdata = `http://127.0.0.1:5000/products/${product.Id}`
+                    productsdata = await fetchdata(productsdata)
+                    Quantity_of_product_El.innerText = productsdata.Quantity
+                }
+                Name_of_product_El.onclick = () => {
+                    sessionStorage.setItem('productId', product.Id)
+                    location.href = "editproduct.html"
+                }
+                customers_page_El.onclick = () => {
+                    sessionStorage.removeItem('customerId')
+                    location.href = "customers.html"
+                }
+                product_page_El.onclick = () => {
+                    location.href = "products.html"
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>

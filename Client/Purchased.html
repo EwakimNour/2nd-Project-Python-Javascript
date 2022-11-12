@@ -1,0 +1,258 @@
+<html>
+
+<head>
+    <style>
+        select {
+            width: 150px;
+            height: 30px;
+        }
+
+        h2 {
+            font-size: 30px;
+        }
+
+        input {
+            width: 120px;
+            height: 30px;
+            font-size: 15px;
+        }
+
+        table {
+            width: 600px;
+            /* height: auto; */
+        }
+
+        td {
+            width: 150px;
+            height: 25px;
+            font-size: larger;
+            text-align: center;
+        }
+    </style>
+    <title>Purchased</title>
+</head>
+
+<body onload="getallData()">
+    <h1>Purchased</h1>
+    <div id="header">
+        <h2>Look for one specific receipt</h2>
+        <span style="font-size: 25px;">First you need to choose the full name of the customer</span>
+        <select name="FulltNameCustomer" id="FullNamelist"></select><br><br>
+        <span style="font-size: 25px;">Then must choose the product</span>
+        <select name="ProductList" id="ProductList"></select>
+        <input type="text" id="Date">
+        <input type="button" id="Search" value="search" onclick="resultofsearch()">
+        <input type="button" value="menupage" onclick="menupage()"><br>
+    </div>
+    <div id="result">
+        <h2 id="test_results" style="display: none;">result of searching:</h2>
+        <span id="purchase">No purchase found</span>
+        <table border="1" id="table_res_search">
+            <!-- <tr>
+                <td>name</td>
+            </tr> -->
+        </table>
+    </div>
+
+    <script>
+        let FullNamelistEl = document.getElementById('FullNamelist')
+        let ProductListEl = document.getElementById('ProductList')
+        let resultEl = document.getElementById('result')
+        let DateEl = document.getElementById('Date')
+        let searchEl = document.getElementById('search')
+        let test_resultsEl = document.getElementById("test_results")
+        let purchaseEl = document.getElementById('purchase')
+        let table_res_searchEl = document.getElementById('table_res_search')
+        table_res_searchEl.style.border = "1"
+        let d = new Date()
+        let date = `${d.getDay()}.${d.getMonth()}.${d.getFullYear()}`
+        const fetchdata = async (linkdata) => {
+            const resp = await fetch(linkdata)
+            if (resp.ok) {
+                let data = await resp.json()
+                return data
+            }
+        }
+        async function getallData() {
+            let productsEl = document.getElementById("products")
+            let productsdata = `http://127.0.0.1:5000/products`
+            products = await fetchdata(productsdata)
+            let customersdata = `http://127.0.0.1:5000/customers`
+            customers = await fetchdata(customersdata)
+            let purchasesdata = `http://127.0.0.1:5000/purchases`
+            purchases = await fetchdata(purchasesdata)
+            DateEl.value = date
+            let optFnEl = document.createElement('option')
+            let optPEl = document.createElement('option')
+            optFnEl.value = 0
+            optPEl.value = 0
+            optFnEl.innerText = "Select name here"
+            optPEl.innerText = "Select product here"
+            FullNamelistEl.appendChild(optFnEl)
+            ProductListEl.appendChild(optPEl)
+            customers.forEach(customer => {
+                let option = document.createElement("option");
+                option.value = `${customer.Id}`;
+                option.innerText = `${customer.FirstName}  ${customer.LastName}`;
+                FullNamelistEl.appendChild(option);
+            });
+            products.forEach(product => {
+                let option = document.createElement("option");
+                option.value = `${product.Id}`;
+                option.innerText = `${product.Name}  `;
+                ProductListEl.appendChild(option);
+            });
+            table_res_searchEl.style.display = 'none'
+            // test_resultsEl.style.display = 'none'
+            purchaseEl.style.display = 'none'
+        }
+        const trtitlefunc = () => {
+            let trtitle = document.createElement('tr')
+            table_res_searchEl.appendChild(trtitle)
+            let space_title = document.createElement('td')
+            trtitle.appendChild(space_title)
+            let customerEl = document.createElement('td')
+            trtitle.appendChild(customerEl)
+            customerEl.innerText = " customer"
+            let productEl = document.createElement('td')
+            trtitle.appendChild(productEl)
+            productEl.innerText = "product"
+            let date_purchase = document.createElement('td')
+            trtitle.appendChild(date_purchase)
+            date_purchase.innerText = "date purchase"
+        }
+        const fill_table_all_purchases = async (i, purchase_date, customer, product) => {
+            let trEl = document.createElement('tr')
+            table_res_searchEl.appendChild(trEl)
+            let tdindexEl = document.createElement('td')
+            trEl.appendChild(tdindexEl)
+            tdindexEl.innerText = i
+            let tdcustomerEl = document.createElement('td')
+            trEl.appendChild(tdcustomerEl)
+            tdcustomerEl.innerText = `${customer.FirstName} ${customer.LastName}`
+            let tdproductEl = document.createElement('td')
+            trEl.appendChild(tdproductEl)
+            tdproductEl.innerText = `${product.Name}`
+            let tdpurchase_dateEl = document.createElement('td')
+            trEl.appendChild(tdpurchase_dateEl)
+            tdpurchase_dateEl.innerText = `${purchase_date.Date}`
+        }
+        const resultofsearch = async () => {
+            test_resultsEl.style.display = 'block'
+            table_res_searchEl.style.display = 'block'
+            table_res_searchEl.innerText = ""
+            arr = []
+            text_res = ""
+            if (FullNamelistEl.value == 0 && ProductListEl.value == 0) {
+                if (purchases == "There is no purchases in our system") {
+                    console.log(purchases)
+                    purchaseEl.innerText = purchases
+                    table_res_searchEl.style.display = 'none'
+                    purchaseEl.style.display = 'block'
+                }
+                else {
+                    purchaseEl.style.display = 'none'
+                    trtitlefunc()
+                    arr = purchases
+                    i = 0
+                    for (let i = 0; i < arr.length; i++) {
+                        let customer = `http://127.0.0.1:5000/customers/${arr[i].CustomerID}`
+                        customer = await fetchdata(customer)
+                        let product = `http://127.0.0.1:5000/products/${arr[i].ProductID}`
+                        product = await fetchdata(product)
+                        fill_table_all_purchases(i + 1, arr[i], customer, product)
+                    }
+                }
+            } else if (FullNamelistEl.value == 0) {
+                let all_customer = `http://127.0.0.1:5000/purchases/searchbyproductid/${ProductListEl.value}`
+                all_customer = await fetchdata(all_customer)
+
+                if (all_customer == "There is no product with this identity" || all_customer == "No customer bought this product") {
+                    console.log(all_customer)
+                    purchaseEl.innerText = all_customer
+                    table_res_searchEl.style.display = 'none'
+                    purchaseEl.style.display = 'block'
+                } else {
+                    purchaseEl.style.display = 'none'
+                    trtitlefunc()
+                    arr = all_customer
+                    i = 0
+                    console.log(all_customer)
+                    let product = `http://127.0.0.1:5000/products/${ProductListEl.value}`
+                    product = await fetchdata(product)
+                    for (let i = 0; i < arr.length; i++) {
+                        let customer = `http://127.0.0.1:5000/customers/${arr[i].Id}`
+                        customer = await fetchdata(customer)
+                        fill_table_all_purchases(i + 1, arr[i], customer, product)
+                    }
+                }
+            } else if (ProductListEl.value == 0) {
+                let products_data = `http://127.0.0.1:5000/purchases/searchbycustomerid/${FullNamelistEl.value}`
+                products_data = await fetchdata(products_data)
+                if (products_data == "There is no customer with this identity" || products_data == "The customer did not purchase any product") {
+                    console.log(products_data)
+                    purchaseEl.innerText = products_data
+                    table_res_searchEl.style.display = 'none'
+                    purchaseEl.style.display = 'block'
+                } else {
+                    purchaseEl.style.display = 'none'
+                    trtitlefunc()
+                    arr = products_data
+                    i = 0
+                    console.log(products_data)
+                    let customer = `http://127.0.0.1:5000/customers/${FullNamelistEl.value}`
+                    customer = await fetchdata(customer)
+                    for (let i = 0; i < arr.length; i++) {
+                        let product = `http://127.0.0.1:5000/products/${arr[i].Id}`
+                        product = await fetchdata(product)
+                        fill_table_all_purchases(i + 1, arr[i], customer, product)
+                    }
+                }
+            } else {
+                // headerEl.style.display = 'none'
+                console.log("home")
+                console.log("CustomerID", FullNamelistEl.value)
+                obj = {
+                    "CustomerID": FullNamelistEl.value,
+                    "ProductID": ProductListEl.value,
+                    "Date": DateEl.value
+                }
+                let fetchParams = {
+                    method: "PUT",
+                    body: JSON.stringify(obj),
+                    headers: { "Content-type": "application/json" }
+                }
+                console.log(obj)
+                const resp = await fetch(`http://127.0.0.1:5000/purchases/search_obj`, fetchParams)
+                let status = await resp.json();
+                console.log(status);
+                one_purchase_date = status
+                if (one_purchase_date == "There is no customer with this identity" || one_purchase_date == "There is no product with this identity" || one_purchase_date == "There were no sales that day" || one_purchase_date == "There is no purchase with this data") {
+                    console.log(one_purchase_date)
+                    purchaseEl.innerText = one_purchase_date
+                    table_res_searchEl.style.display = 'none'
+                    purchaseEl.style.display = 'block'
+
+                } else {
+                    purchaseEl.style.display = 'none'
+                    trtitlefunc()
+                    console.log(one_purchase_date)
+                    let customer = `http://127.0.0.1:5000/customers/${FullNamelistEl.value}`
+                    customer = await fetchdata(customer)
+                    let product = `http://127.0.0.1:5000/products/${ProductListEl.value}`
+                    product = await fetchdata(product)
+                    fill_table_all_purchases("specific purchase", one_purchase_date, customer, product)
+                }
+            }
+        }
+        const menupage = () => {
+            sessionStorage.removeItem('customerId')
+            sessionStorage.removeItem('productId')
+            location.href = "menupage.html"
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,165 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-size: x-large;
+            margin: 30px;
+        }
+
+        #editproducts {
+            margin: 10px;
+            position: absolute;
+            top: 100px;
+            left: 280px;
+        }
+    </style>
+</head>
+<div id="editproducts"></div>
+
+<body onload="getproductsData()">
+    <div id="ListOfCustomers"></div>
+    <div id="edit_product"></div>
+    <script>
+        let productsEl = document.getElementById("products")
+        let edit_products_El = document.getElementById("editproducts")
+        const fetchdata = async (linkdata) => {
+            const resp = await fetch(linkdata)
+            if (resp.ok) {
+                let data = await resp.json()
+                return data
+            }
+        }
+        async function getproductsData() {
+            let productvalue = sessionStorage.getItem('productId')
+            let List_Of_Customers_El = document.getElementById("ListOfCustomers")
+            let customers_Title_El = document.createElement('p')
+            List_Of_Customers_El.appendChild(customers_Title_El)
+            customers_Title_El.innerText = "Our Customers"
+            let customers_Ul_El = document.createElement('ol')
+            List_Of_Customers_El.appendChild(customers_Ul_El)
+            customers_Ul_El.type = "1"
+            customers_Ul_El.style.width = "30%"
+            console.log(productvalue)
+            let card_Product_El = document.createElement('div')
+            let card_p_El = document.createElement('div')
+            let People_who_bought_El = document.createElement('h2')
+            let amount_People_who_bought_El = document.createElement('SPAN')
+            let ulEl = document.createElement('ul')
+            let Name_of_product_li_El = document.createElement('tr')
+            let Space_Name_of_product_Text_El = document.createElement('SPAN')
+            let Name_of_product_Text_El = document.createElement('LABEL')
+            let Name_of_product_El = document.createElement('input')
+            let Price_of_product_li_El = document.createElement('tr')
+            let Space_Price_of_product_Text_El = document.createElement('SPAN')
+            let Price_of_product_Text_El = document.createElement('LABEL')
+            let Price_of_product_El = document.createElement('input')
+            let Quantity_of_product_li_El = document.createElement('tr')
+            let Space_Quantity_of_product_Text_El = document.createElement('SPAN')
+            let Quantity_of_product_Text_El = document.createElement('LABEL')
+            let Quantity_of_product_El = document.createElement('input')
+            let Button_of_product_li_El = document.createElement('tr')
+            let Space_Button_of_product_Text_El = document.createElement('SPAN')
+            let Button_For_Update_El = document.createElement('BUTTON')
+            let Button_For_Delete_El = document.createElement('BUTTON')
+            let return_El = document.createElement('BUTTON')
+            edit_products_El.appendChild(card_Product_El)
+            card_Product_El.appendChild(card_p_El)
+            card_p_El.appendChild(People_who_bought_El)
+            People_who_bought_El.appendChild(amount_People_who_bought_El)
+            card_p_El.appendChild(ulEl)
+            ulEl.appendChild(Name_of_product_li_El)
+            Name_of_product_li_El.appendChild(Space_Name_of_product_Text_El)
+            Name_of_product_li_El.appendChild(Name_of_product_Text_El)
+            Name_of_product_li_El.appendChild(Name_of_product_El)
+            ulEl.appendChild(Price_of_product_li_El)
+            Price_of_product_li_El.appendChild(Space_Price_of_product_Text_El)
+            Price_of_product_li_El.appendChild(Price_of_product_Text_El)
+            Price_of_product_li_El.appendChild(Price_of_product_El)
+            ulEl.appendChild(Quantity_of_product_li_El)
+            Quantity_of_product_li_El.appendChild(Space_Quantity_of_product_Text_El)
+            Quantity_of_product_li_El.appendChild(Quantity_of_product_Text_El)
+            Quantity_of_product_li_El.appendChild(Quantity_of_product_El)
+            ulEl.appendChild(Button_of_product_li_El)
+            Button_of_product_li_El.appendChild(Space_Button_of_product_Text_El)
+            Button_of_product_li_El.appendChild(Button_For_Update_El)
+            Button_of_product_li_El.appendChild(Button_For_Delete_El)
+            Button_of_product_li_El.appendChild(return_El)
+            People_who_bought_El.innerText = "product for editing"
+            Name_of_product_Text_El.innerText = "Name Of Product  "
+            Price_of_product_Text_El.innerText = "Price  "
+            Quantity_of_product_Text_El.innerText = "Quantity  "
+            Button_For_Update_El.innerText = "Update  "
+            Button_For_Delete_El.innerText = "Delete"
+            return_El.innerText = "go back"
+            if (productvalue == null) {
+                productvalue = 0
+            }
+            let rescustomers = `http://127.0.0.1:5000/purchases/searchbyproductid/${productvalue}`
+            all_customer = await fetchdata(rescustomers)
+
+            if (all_customer == "There is no product with this identity" || all_customer == "No customer bought this product") {
+                console.log(all_customer)
+            } else {
+                all_customer.forEach(customer => {
+                    let customer_Li = document.createElement('li')
+                    customers_Ul_El.appendChild(customer_Li)
+                    customer_Li.innerText = `${customer.FirstName} ${customer.LastName}`
+                    customer_Li.id = customer.Id
+                    customer_Li.onclick = () => {
+                        sessionStorage.setItem('customerId', customer_Li.id)
+                        sessionStorage.setItem('productId', product.Id)
+                        location.href = "editcustomer.html"
+                    }
+                });
+            }
+            let productsdata = `http://127.0.0.1:5000/products/${productvalue}`
+            product = await fetchdata(productsdata)
+            Name_of_product_El.value = product.Name
+            Price_of_product_El.value = product.Price
+            Quantity_of_product_El.value = product.Quantity
+            Button_For_Update_El.onclick = async () => {
+                obj = {
+                    "Name": Name_of_product_El.value,
+                    "Price": Price_of_product_El.value,
+                    "Quantity": Quantity_of_product_El.value
+                }
+                let fetchParams = {
+                    method: "PUT",
+                    body: JSON.stringify(obj),
+                    headers: { "Content-type": "application/json" }
+                }
+                //sending request
+                const resps = await fetch(`http://127.0.0.1:5000/products/${productvalue}`, fetchParams)
+                let status = await resps.json();
+                console.log(status);
+            }
+            Button_For_Delete_El.onclick = async () => {
+                let fetchParams = {
+                    method: "DELETE",
+                    headers: { "Content-type": "application/json" }
+                }
+                //sending request
+                let resp = await fetch(`http://127.0.0.1:5000/purchases/deletebyproductid/${productvalue}`, fetchParams)
+                let status = await resp.json();
+                console.log(status);
+                resp = await fetch(`http://127.0.0.1:5000/products/${productvalue}`, fetchParams)
+                status = await resp.json();
+                console.log(status);
+                Name_of_product_El.value = ""
+                Price_of_product_El.value = ""
+                Quantity_of_product_El.value = ""
+
+                sessionStorage.removeItem('productId')
+            }
+            // let return_El = document.createElement('BUTTON')
+            return_El.onclick = () => {
+                sessionStorage.removeItem('customerId')
+                location.href = "products.html"
+            }
+        }
+
+    </script>
+</body>
+
+</html>

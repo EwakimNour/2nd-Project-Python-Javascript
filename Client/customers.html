@@ -1,0 +1,119 @@
+<html>
+
+<head>
+    <style>
+
+    </style>
+    <title>customers</title>
+</head>
+
+<body onload="getcustomersData()">
+    <h1>Customers</h1>
+    <div id="customers"></div>
+    <script>
+        let date = new Date().toLocaleDateString()
+        // Create Table product
+        const fetchdata = async (linkdata) => {
+            const resp = await fetch(linkdata)
+            if (resp.ok) {
+                let data = await resp.json()
+                return data
+            }
+        }
+        async function getcustomersData() {
+            let customersEl = document.getElementById("customers")
+            let customersdata = `http://127.0.0.1:5000/customers`
+            customers = await fetchdata(customersdata)
+            i = 0
+            customers.forEach(customer => {
+                i++
+                let card_customers_El = document.createElement('div')
+                let card_c_El = document.createElement('div')
+                let People_who_bought_El = document.createElement('h2')
+                let amount_People_who_bought_El = document.createElement('SPAN')
+                let ulEl = document.createElement('ul')
+                let FirstName_of_customer_li_El = document.createElement('li')
+                let Space_FirstName_of_customer_Text_El = document.createElement('SPAN')
+                let FirstName_of_customer_Text_El = document.createElement('LABEL')
+                let FirstName_of_customer_El = document.createElement('SPAN')
+                let LastName_of_customer_li_El = document.createElement('li')
+                let Space_LastName_of_customer_Text_El = document.createElement('SPAN')
+                let LastName_of_customer_Text_El = document.createElement('LABEL')
+                let LastName_of_customer_El = document.createElement('SPAN')
+                let City_of_customer_li_El = document.createElement('li')
+                let Space_City_of_customer_Text_El = document.createElement('SPAN')
+                let City_of_customer_Text_El = document.createElement('LABEL')
+                let City_of_customer_El = document.createElement('SPAN')
+                let Add_Purchase_tr_El = document.createElement('tr')
+                let your_order_El = document.createElement('button')
+                let Button_For_Edit_Purchase_El = document.createElement('button')
+                let product_page_El = document.createElement('button')
+                let menu_page_El = document.createElement('button')
+                customersEl.appendChild(card_customers_El)
+                card_customers_El.appendChild(card_c_El)
+                card_c_El.appendChild(People_who_bought_El)
+                People_who_bought_El.appendChild(amount_People_who_bought_El)
+                card_c_El.appendChild(ulEl)
+                ulEl.appendChild(FirstName_of_customer_li_El)
+                FirstName_of_customer_li_El.appendChild(Space_FirstName_of_customer_Text_El)
+                FirstName_of_customer_li_El.appendChild(FirstName_of_customer_Text_El)
+                FirstName_of_customer_li_El.appendChild(FirstName_of_customer_El)
+                ulEl.appendChild(LastName_of_customer_li_El)
+                LastName_of_customer_li_El.appendChild(Space_LastName_of_customer_Text_El)
+                LastName_of_customer_li_El.appendChild(LastName_of_customer_Text_El)
+                LastName_of_customer_li_El.appendChild(LastName_of_customer_El)
+                ulEl.appendChild(City_of_customer_li_El)
+                City_of_customer_li_El.appendChild(Space_City_of_customer_Text_El)
+                City_of_customer_li_El.appendChild(City_of_customer_Text_El)
+                City_of_customer_li_El.appendChild(City_of_customer_El)
+                ulEl.appendChild(Add_Purchase_tr_El)
+                Add_Purchase_tr_El.appendChild(your_order_El)
+                Add_Purchase_tr_El.appendChild(Button_For_Edit_Purchase_El)
+                Add_Purchase_tr_El.appendChild(product_page_El)
+                Add_Purchase_tr_El.appendChild(menu_page_El)
+                People_who_bought_El.innerText = `Customer Number ${i}`
+                FirstName_of_customer_Text_El.innerText = "First Name  "
+                FirstName_of_customer_El.innerText = customer.FirstName
+                LastName_of_customer_Text_El.innerText = "LastName  "
+                LastName_of_customer_El.innerText = customer.LastName
+                City_of_customer_Text_El.innerText = "City  "
+                City_of_customer_El.innerText = customer.City
+                your_order_El.innerText = "You ORDER"
+                product_page_El.innerText = "Products Page"
+                menu_page_El.innerText = "Menu Page"
+                your_order_El.onclick = () => {
+                    sessionStorage.setItem('customerId', customer.Id)
+                    location.href = "order.html"
+                }
+                const getorderproducts = async (customerId) => {
+                    let products = `http://127.0.0.1:5000/purchases/searchbycustomerid/${customerId}`
+                    products = await fetchdata(products)
+                    if (products == "The customer did not purchase any product") {
+                        your_order_El.style.display = "none"
+                    } else {
+                        your_order_El.style.display = "block"
+                    }
+                }
+                getorderproducts(customer.Id)
+                // Date_of_Add_Purchase_El.value = date
+
+                Button_For_Edit_Purchase_El.innerText = "Edit"
+                Button_For_Edit_Purchase_El.onclick = async () => {
+                    sessionStorage.setItem('customerId', customer.Id)
+                    location.href = "editcustomer.html"
+                }
+                product_page_El.onclick = () => {
+                    sessionStorage.setItem('customerId', customer.Id)
+                    location.href = "products.html"
+                }
+                menu_page_El.onclick = () => {
+                    sessionStorage.removeItem('customerId')
+                    sessionStorage.removeItem('productId')
+                    location.href = "menupage.html"
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

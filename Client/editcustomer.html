@@ -1,0 +1,183 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-size: x-large;
+            margin: 30px;
+        }
+
+        #editcustomers {
+            margin: 10px;
+            position: absolute;
+            top: 100px;
+            left: 280px;
+        }
+    </style>
+</head>
+<div id="editcustomers"></div>
+
+<body onload="getcustomersData()">
+    <div id="ListOfCustomers"></div>
+    <div id="edit_product"></div>
+    <script>
+        let productsEl = document.getElementById("products")
+        let edit_customers_El = document.getElementById("editcustomers")
+        const fetchdata = async (linkdata) => {
+            const resp = await fetch(linkdata)
+            if (resp.ok) {
+                let data = await resp.json()
+                return data
+            }
+        }
+        async function getcustomersData() {
+
+            let List_purchased_by_the_customer = document.getElementById("ListOfCustomers")
+            let purchased_Title_El = document.createElement('p')
+            List_purchased_by_the_customer.appendChild(purchased_Title_El)
+            purchased_Title_El.innerText = "Your Products"
+            let product_Ul_El = document.createElement('ol')
+            List_purchased_by_the_customer.appendChild(product_Ul_El)
+            product_Ul_El.type = "1"
+            product_Ul_El.style.width = "30%"
+            let card_customer_El = document.createElement('div')
+            let card_p_El = document.createElement('div')
+            let Products_that_customer_bought_El = document.createElement('h2')
+            let amount_Products_bought_El = document.createElement('SPAN')
+            let ulEl = document.createElement('ul')
+            let FirstName_of_customer_li_El = document.createElement('tr')
+            let Space_FirstName_of_customer_Text_El = document.createElement('SPAN')
+            let FirstName_of_customer_Text_El = document.createElement('LABEL')
+            let FirstName_of_customer_El = document.createElement('input')
+            let LastName_of_customer_li_El = document.createElement('tr')
+            let Space_LastName_of_customer_Text_El = document.createElement('SPAN')
+            let LastName_of_customer_Text_El = document.createElement('LABEL')
+            let LastName_of_customer_El = document.createElement('input')
+            let City_of_customer_li_El = document.createElement('tr')
+            let Space_City_of_customer_Text_El = document.createElement('SPAN')
+            let City_of_customer_Text_El = document.createElement('LABEL')
+            let City_of_customer_El = document.createElement('input')
+            let Button_of_customer_li_El = document.createElement('tr')
+            let Space_Button_of_customer_Text_El = document.createElement('SPAN')
+            let Button_For_Update_El = document.createElement('BUTTON')
+            let Button_For_Delete_El = document.createElement('BUTTON')
+            let return_El = document.createElement('BUTTON')
+            edit_customers_El.appendChild(card_customer_El)
+            card_customer_El.appendChild(card_p_El)
+            card_p_El.appendChild(Products_that_customer_bought_El)
+            Products_that_customer_bought_El.appendChild(amount_Products_bought_El)
+            card_p_El.appendChild(ulEl)
+            ulEl.appendChild(FirstName_of_customer_li_El)
+            FirstName_of_customer_li_El.appendChild(Space_FirstName_of_customer_Text_El)
+            FirstName_of_customer_li_El.appendChild(FirstName_of_customer_Text_El)
+            FirstName_of_customer_li_El.appendChild(FirstName_of_customer_El)
+            ulEl.appendChild(LastName_of_customer_li_El)
+            LastName_of_customer_li_El.appendChild(Space_LastName_of_customer_Text_El)
+            LastName_of_customer_li_El.appendChild(LastName_of_customer_Text_El)
+            LastName_of_customer_li_El.appendChild(LastName_of_customer_El)
+            ulEl.appendChild(City_of_customer_li_El)
+            City_of_customer_li_El.appendChild(Space_City_of_customer_Text_El)
+            City_of_customer_li_El.appendChild(City_of_customer_Text_El)
+            City_of_customer_li_El.appendChild(City_of_customer_El)
+            ulEl.appendChild(Button_of_customer_li_El)
+            Button_of_customer_li_El.appendChild(Space_Button_of_customer_Text_El)
+            Button_of_customer_li_El.appendChild(Button_For_Update_El)
+            Button_of_customer_li_El.appendChild(Button_For_Delete_El)
+            Button_of_customer_li_El.appendChild(return_El)
+            Products_that_customer_bought_El.innerText = "customer for editing"
+            FirstName_of_customer_Text_El.innerText = "FirstName  "
+            LastName_of_customer_Text_El.innerText = "LastName  "
+            City_of_customer_Text_El.innerText = "City  "
+            Button_For_Update_El.innerText = "Update  "
+            Button_For_Delete_El.innerText = "Delete"
+            return_El.innerText = "go back"
+            let customervalue = sessionStorage.getItem('customerId')
+            let productvalue = sessionStorage.getItem('productId')
+            if (customervalue == null) {
+                customervalue = 0
+            }
+            console.log(customervalue)
+            console.log("customervalue", customervalue)
+            var customerdata = `http://127.0.0.1:5000/customers/${customervalue}`
+            customerdata = await fetchdata(customerdata)
+            if (customerdata == "Not found customer in client system with this identity") {
+                console.log("customerdata", customerdata)
+
+            } else {
+                FirstName_of_customer_El.value = customerdata.FirstName
+                LastName_of_customer_El.value = customerdata.LastName
+                City_of_customer_El.value = customerdata.City
+                console.log(customervalue)
+                console.log(customerdata)
+                FirstName_of_customer_El.value = customerdata.FirstName
+                LastName_of_customer_El.value = customerdata.LastName
+                City_of_customer_El.value = customerdata.City
+                let products_data = `http://127.0.0.1:5000/purchases/searchbycustomerid/${customervalue}`
+                products_data = await fetchdata(products_data)
+                if (products_data == "There is no customer with this identity" || products_data == "The customer did not purchase any product") {
+                    console.log(products_data)
+                    purchased_Title_El.style.display = "none"
+                } else {
+                    console.log("products_data", products_data)
+                    products_data.forEach(product_data => {
+                        let product_Li = document.createElement('li')
+                        product_Ul_El.appendChild(product_Li)
+                        product_Li.innerText = `${product_data.Name}`
+                        console.log("product_data.Name", product_data.Name)
+                        product_Li.id = products_data.Id
+                        product_Li.onclick = () => {
+                            sessionStorage.setItem('customerId', customervalue)
+                            sessionStorage.setItem('productId', product_data.Id)
+                            location.href = "editproduct.html"
+                        }
+                    });
+                }
+                Button_For_Update_El.onclick = async () => {
+
+                    obj = {
+                        "FirstName": FirstName_of_customer_El.value,
+                        "LastName": LastName_of_customer_El.value,
+                        "City": City_of_customer_El.value
+                    }
+                    let fetchParams = {
+                        method: "PUT",
+                        body: JSON.stringify(obj),
+                        headers: { "Content-type": "application/json" }
+                    }
+                    //sending request
+                    const resps = await fetch(`http://127.0.0.1:5000/customers/${customervalue}`, fetchParams)
+                    let status = await resps.json();
+                    console.log(status);
+                }
+                Button_For_Delete_El.onclick = async () => {
+                    let fetchParams = {
+                        method: "DELETE",
+                        headers: { "Content-type": "application/json" }
+                    }
+                    //sending request
+                    let resp = await fetch(`http://127.0.0.1:5000/purchases/deletebycustomerid/${customervalue}`, fetchParams)
+                    let status = await resp.json();
+                    console.log(status);
+                    resp = await fetch(`http://127.0.0.1:5000/customers/${customervalue}`, fetchParams)
+                    status = await resp.json();
+                    console.log(status);
+                    FirstName_of_customer_El.value = ""
+                    LastName_of_customer_El.value = ""
+                    City_of_customer_El.value = ""
+
+                    sessionStorage.removeItem('customerId')
+                }
+                // let return_El = document.createElement('BUTTON')
+                return_El.onclick = () => {
+                    sessionStorage.removeItem('customerId')
+                    location.href = "customers.html"
+                    console.log("yessss")
+                }
+            }
+
+        }
+
+    </script>
+</body>
+
+</html>
